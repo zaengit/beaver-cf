@@ -1,4 +1,4 @@
-# @zbeaver/beaver-cf
+# @zaengit/beaver-cf
 
 Cloudflare Workers-native CMS runtime: admin panel, Hono API, public-content
 queries, and reusable React UI for Astro sites.
@@ -7,8 +7,8 @@ This package is edge-only. It uses Cloudflare bindings and Web APIs at runtime;
 it does not support Node servers, local filesystem storage, MySQL/PostgreSQL,
 S3, SMTP, or email delivery.
 
-[![npm version](https://img.shields.io/npm/v/@zbeaver/beaver-cf)](https://www.npmjs.com/package/@zbeaver/beaver-cf)
-[![license](https://img.shields.io/npm/l/@zbeaver/beaver-cf)](./LICENSE)
+[![GitHub package](https://img.shields.io/badge/package-GitHub%20Packages-181717?logo=github)](https://github.com/zaengit/beaver-cf/packages)
+[![license](https://img.shields.io/github/license/zaengit/beaver-cf)](./LICENSE)
 
 ## Runtime contract
 
@@ -39,7 +39,7 @@ as reference configuration.
 Install the package and Cloudflare adapter in the host application:
 
 ```bash
-npm install @zbeaver/beaver-cf @astrojs/cloudflare @astrojs/react wrangler
+npm install @zaengit/beaver-cf @astrojs/cloudflare @astrojs/react wrangler
 ```
 
 Use the Workers adapter in `astro.config.mjs`:
@@ -60,7 +60,7 @@ Forward the API from an Astro route. The generated middleware wraps the request
 with the Cloudflare runtime before this route executes:
 
 ```ts
-import { apiApp } from "@zbeaver/beaver-cf/server"
+import { apiApp } from "@zaengit/beaver-cf/server"
 
 export const ALL = ({ request }: { request: Request }) => apiApp.fetch(request)
 ```
@@ -69,7 +69,7 @@ For a custom Worker entrypoint, pass bindings directly:
 
 ```ts
 import type { ExecutionContext } from "@cloudflare/workers-types"
-import { apiApp, withBeaverRuntime, type CloudflareEnv } from "@zbeaver/beaver-cf/server"
+import { apiApp, withBeaverRuntime, type CloudflareEnv } from "@zaengit/beaver-cf/server"
 
 export default {
   fetch(request: Request, env: CloudflareEnv, ctx: ExecutionContext) {
@@ -86,7 +86,7 @@ Register the host's compiled content-type registry once at Worker startup:
 
 ```ts
 import registry from "./components/content-type-templates/registry.json"
-import { setContentTypeRegistry } from "@zbeaver/beaver-cf/server"
+import { setContentTypeRegistry } from "@zaengit/beaver-cf/server"
 
 setContentTypeRegistry(registry)
 ```
@@ -154,7 +154,7 @@ import {
   getPublishedPostByType,
   getSiteSettings,
   withBeaverRuntime,
-} from "@zbeaver/beaver-cf/server"
+} from "@zaengit/beaver-cf/server"
 
 const result = await withBeaverRuntime(env, async () => {
   const post = await getPublishedPostByType("page", "home")
@@ -187,7 +187,7 @@ import {
   deleteStorageFile,
   getStorageObject,
   writeStorageFile,
-} from "@zbeaver/beaver-cf/server"
+} from "@zaengit/beaver-cf/server"
 
 await writeStorageFile("images/hero.webp", bytes, {
   contentType: "image/webp",
@@ -219,4 +219,10 @@ npm run build
 npx tsc --noEmit
 ```
 
-The package is published as `@zbeaver/beaver-cf`.
+The package is published to GitHub Packages as `@zaengit/beaver-cf`.
+
+For local installation, configure the GitHub Packages registry for the scope:
+
+```ini
+@zaengit:registry=https://npm.pkg.github.com
+```

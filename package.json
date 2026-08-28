@@ -1,6 +1,9 @@
 {
-  "name": "@zbeaver/beaver-cf",
+  "name": "@zaengit/beaver-cf",
   "version": "0.1.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "description": "Cloudflare Workers-native CMS server, API, and React admin UI.",
   "license": "MIT",
   "keywords": [
@@ -16,11 +19,11 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zaengit/beaver.git"
+    "url": "git+https://github.com/zaengit/beaver-cf.git"
   },
-  "homepage": "https://github.com/zaengit/beaver#readme",
+  "homepage": "https://github.com/zaengit/beaver-cf#readme",
   "bugs": {
-    "url": "https://github.com/zaengit/beaver/issues"
+    "url": "https://github.com/zaengit/beaver-cf/issues"
   },
   "main": "./dist/server.js",
   "types": "./dist/server.d.ts",
