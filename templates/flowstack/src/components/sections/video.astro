@@ -1,0 +1,30 @@
+---
+import type { Section } from "./shared/types"
+import SectionHeading from "./shared/section-heading.astro"
+
+interface Props { section: Section; videoEmbedUrl: string | null }
+const { section, videoEmbedUrl } = Astro.props
+---
+
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+  <section id={section.style_id || undefined} class:list={[section.style_css]}>
+    <div class="flex flex-col gap-8">
+      <div class="text-center">
+        <SectionHeading content={section} theme="light" />
+      </div>
+      {videoEmbedUrl && (
+        <div class="overflow-hidden border border-[var(--line-strong)] bg-black">
+          <div class="aspect-video">
+            <iframe
+              class="h-full w-full border-0"
+              src={videoEmbedUrl}
+              title={section.title || "Video"}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</div>

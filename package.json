@@ -1,0 +1,115 @@
+{
+  "name": "@zbeaver/beaver-cf",
+  "version": "0.1.0",
+  "description": "Cloudflare Workers-native CMS server, API, and React admin UI.",
+  "license": "MIT",
+  "keywords": [
+    "cms",
+    "content-management",
+    "admin-panel",
+    "hono",
+    "astro",
+    "cloudflare-workers",
+    "d1",
+    "r2"
+  ],
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaengit/beaver.git"
+  },
+  "homepage": "https://github.com/zaengit/beaver#readme",
+  "bugs": {
+    "url": "https://github.com/zaengit/beaver/issues"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "prepack": "npm run build",
+    "prepare": "npm run build"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "overrides": {
+    "esbuild": "0.28.2",
+    "fast-uri": "3.1.5",
+    "js-yaml": "4.3.1",
+    "nanoid": "3.3.18",
+    "tsx": {
+      "esbuild": "0.28.2"
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "default": "./dist/ui.js"
+    },
+    "./ui/style.css": "./dist/ui/style.css"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.4.1",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@tiptap/extension-character-count": "^3.23.4",
+    "@tiptap/extension-code-block-lowlight": "^3.23.4",
+    "@tiptap/extension-highlight": "^3.23.4",
+    "@tiptap/extension-image": "^3.23.4",
+    "@tiptap/extension-link": "^3.23.4",
+    "@tiptap/extension-placeholder": "^3.23.4",
+    "@tiptap/extension-table": "^3.23.4",
+    "@tiptap/extension-task-item": "^3.23.4",
+    "@tiptap/extension-task-list": "^3.23.4",
+    "@tiptap/extension-text-align": "^3.23.4",
+    "@tiptap/extension-underline": "^3.23.4",
+    "@tiptap/extension-youtube": "^3.23.4",
+    "@tiptap/react": "^3.23.4",
+    "@tiptap/starter-kit": "^3.23.4",
+    "@cloudflare/workers-types": "^5.20260828.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.1",
+    "highlight.js": "^11.12.0",
+    "jose": "^6.2.3",
+    "lowlight": "^3.3.0",
+    "lucide-react": "^1.14.0",
+    "next-themes": "^0.4.6",
+    "otplib": "^13.5.0",
+    "qrcode.react": "^4.2.0",
+    "react-router": "^8.3.0",
+    "sanitize-html": "^2.17.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "ulidx": "^2.4.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/sanitize-html": "^2.16.1",
+    "shadcn": "^3.8.3",
+    "tailwindcss": "^4.3.0",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.5"
+  }
+}

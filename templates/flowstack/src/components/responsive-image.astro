@@ -1,0 +1,27 @@
+---
+import { safeImageSrc } from "./safe-url"
+
+interface Props {
+  src: string
+  alt: string
+  class?: string
+  loading?: "eager" | "lazy"
+  priority?: boolean
+  sizes?: string
+}
+
+const { src, alt, class: className, loading = "lazy", priority = false, sizes = "100vw" } = Astro.props
+const safeSrc = safeImageSrc(src)
+---
+
+{safeSrc && (
+  <img
+    src={safeSrc}
+    sizes={sizes}
+    alt={alt}
+    class={className}
+    loading={priority ? "eager" : loading}
+    decoding="async"
+    fetchpriority={priority ? "high" : "auto"}
+  />
+)}

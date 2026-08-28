@@ -1,0 +1,33 @@
+---
+import PublicLayout from "@/layouts/public-layout.astro"
+import PublicPostList from "@/components/public-post-list.astro"
+import { listPublishedPostsByTag } from "@zbeaver/beaver-cf/server"
+
+const encodedTag = Astro.params.tag ?? ""
+let tag = ""
+
+try {
+  tag = decodeURIComponent(encodedTag).trim().slice(0, 100)
+} catch {
+  return new Response("Tag not found", { status: 404 })
+}
+
+if (!tag) return new Response("Tag not found", { status: 404 })
+
+const result = await listPublishedPostsByTag(tag, 1, 10)
+const posts = result.success ? result.data.data : []
+---
+
+<PublicLayout title={`Tag: ${tag}`}>
+  <main class="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Tag</p>
+    <h1 class="mt-3 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">{tag}</h1>
+    <p class="mt-5 text-slate-600">{result.success ? result.data.meta.total : 0} published item{result.success && result.data.meta.total === 1 ? "" : "s"}</p>
+
+    <PublicPostList
+      posts={posts}
+      listClass="mt-10 divide-y divide-slate-200 border-y border-slate-200"
+      emptyMessage="No published content has this tag yet."
+    />
+  </main>
+</PublicLayout>

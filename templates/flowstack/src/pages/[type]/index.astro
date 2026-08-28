@@ -1,0 +1,44 @@
+---
+import ContentTypeArchive from "@/components/content-type-archive.astro"
+import PublicPage from "@/components/public-page.astro"
+import PublicLayout from "@/layouts/public-layout.astro"
+import { contentTypeRegistry as registry } from "@/shared/registry"
+import { getPublishedArchiveFilterOptions, getPublishedPostByType, listPublishedPostsByType } from "@zbeaver/beaver-cf/server"
+import { parseArchiveSort } from "@/components/content-type-templates/archive/archive-sort"
+
+const { type } = Astro.params
+const contentType = type ? registry.contentTypes.find((candidate) => candidate.slug === type) ?? null : null
+const pageResult = !contentType && type
+  ? await getPublishedPostByType("page", type)
+  : null
+const page = pageResult?.success ? pageResult.data : null
+const { sortBy, sortOrder } = parseArchiveSort(Astro.url.searchParams.get("sort"))
+const filters = {
+  search: Astro.url.searchParams.get("search") ?? undefined,
+  category: Astro.url.searchParams.get("category") ?? undefined,
+  sortBy,
+  sortOrder,
+}
+
+if (!contentType && !page) {
+  return new Response("Page not found", { status: 404 })
+}
+
+const requestedPage = Number(Astro.url.searchParams.get("page") ?? 1)
+const currentPage = Number.isInteger(requestedPage) ? Math.max(1, requestedPage) : 1
+const postsResult = contentType
+  ? await listPublishedPostsByType(contentType.slug, currentPage, 10, filters)
+  : null
+const posts = postsResult?.success ? postsResult.data.data : []
+const pagination = postsResult?.success ? postsResult.data.meta : { currentPage: 1, perPage: 10, total: 0, lastPage: 1, from: 0, to: 0 }
+const filterOptionsResult = contentType ? await getPublishedArchiveFilterOptions(contentType.slug) : null
+const filterOptions = filterOptionsResult?.success ? filterOptionsResult.data : { categories: [], tags: [], customFields: [] }
+---
+
+<PublicLayout title={contentType ? contentType.label : page!.metaTitle || page!.title}>
+  {contentType ? (
+    <ContentTypeArchive contentType={contentType} posts={posts as never[]} filterOptions={filterOptions} filters={filters} pagination={pagination} />
+  ) : (
+    <PublicPage page={page!} />
+  )}
+</PublicLayout>

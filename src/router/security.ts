@@ -1,0 +1,98 @@
+import type { Context } from "hono"
+import { isWithinRateLimit } from "@zbeaver/beaver/app/security/rate-limit"
+import { getRuntimeEnvValue, isProductionRuntime } from "@zbeaver/beaver/app/runtime"
+
+export { isWithinRateLimit }
+
+export function applySecurityHeaders(context: Pick<Context, "header">) {
+  context.header("X-Content-Type-Options", "nosniff")
+  context.header("X-Frame-Options", "SAMEORIGIN")
+  context.header("Referrer-Policy", "strict-origin-when-cross-origin")
+  context.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+  context.header("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.google.com https://challenges.cloudflare.com; script-src 'self' 'unsafe-inline' blob: https://challenges.cloudflare.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'")
+  if (isProductionRuntime()) context.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+}
+
+export function isReadRequest(method: string) {
+  return method === "GET" || method === "HEAD" || method === "OPTIONS"
+}
+
+/**
+ * Enforces a limit even for chunked requests without Content-Length. The body
+ * is rebuilt after inspection so downstream handlers can still consume it.
+ */
+export async function enforceRequestBodyLimit(context: Context, maximum: number) {
+  const request = context.req.raw
+  if (!request.body) return null
+
+  const contentLength = request.headers.get("content-length")
+  if (contentLength && !request.headers.has("transfer-encoding")) {
+    const length = Number(contentLength)
+    return !Number.isSafeInteger(length) || length < 0 || length > maximum
+      ? "Request body is too large."
+      : null
+  }
+
+  const reader = request.body.getReader()
+  const chunks: Uint8Array[] = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.byteLength
+    if (size > maximum) {
+      await reader.cancel()
+      return "Request body is too large."
+    }
+    chunks.push(value)
+  }
+
+  context.req.raw = new Request(request, {
+    body: new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of chunks) controller.enqueue(chunk)
+        controller.close()
+      },
+    }),
+    duplex: "half",
+  } as RequestInit)
+  return null
+}
+
+export function hasValidSameOrigin(request: Request) {
+  const origin = request.headers.get("origin")
+  return Boolean(origin && origin === new URL(request.url).origin)
+}
+
+function isValidIp(value: string) {
+  const candidate = value.trim()
+  const ipv4Parts = candidate.split(".")
+  if (ipv4Parts.length === 4 && ipv4Parts.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255)) return true
+  if (!candidate.includes(":")) return false
+  if (!/^[0-9a-f:.]+$/i.test(candidate)) return false
+  const sections = candidate.split("::")
+  if (sections.length > 2) return false
+  const left = sections[0] ? sections[0].split(":") : []
+  const right = sections[1] ? sections[1].split(":") : []
+  if ([...left, ...right].some((part) => !part || part.length > 4)) return false
+  return sections.length === 2 ? left.length + right.length < 8 : left.length === 8
+}
+
+export function clientAddress(request: Request) {
+  if (getRuntimeEnvValue("TRUST_PROXY") === "true") {
+    const forwarded = [
+      request.headers.get("cf-connecting-ip"),
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      request.headers.get("x-real-ip"),
+    ]
+    for (const candidate of forwarded) {
+      if (candidate && isValidIp(candidate)) return candidate
+    }
+  }
+
+  const hostname = new URL(request.url).hostname.replace(/^\[|\]$/g, "")
+  if (hostname === "localhost" || hostname === "127.0.0.1") return "127.0.0.1"
+  if (hostname === "::1") return "::1"
+
+  return "unknown"
+}

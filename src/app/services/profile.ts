@@ -1,0 +1,53 @@
+import { hashPassword } from "@zbeaver/beaver/app/auth"
+import { getCurrentTimestamp } from "@zbeaver/beaver/pkg/utils/index"
+import { findUserByIdRecord, updateUserRecord, type UserSafe } from "@zbeaver/beaver/app/repositories/users"
+import { findUserByEmailRecord } from "@zbeaver/beaver/app/repositories/users"
+import type { ServiceResult } from "@zbeaver/beaver/pkg/types"
+import { serviceSuccess, serviceNotFound, serviceConflict, serviceForbidden } from "@zbeaver/beaver/app/services/utils"
+import { deleteRefreshSessionsForUser } from "@zbeaver/beaver/app/admin/session-store"
+import { isSuperAdminUserId } from "@zbeaver/beaver/app/admin/super-admin"
+
+interface UpdateProfileInput {
+  name?: string
+  email?: string
+  password?: string
+}
+
+export async function updateProfile(
+  userId: string,
+  data: UpdateProfileInput,
+): Promise<ServiceResult<UserSafe>> {
+  if (isSuperAdminUserId(userId)) {
+    return serviceForbidden("Super Admin profile is managed by ADMIN_* environment variables.")
+  }
+
+  const existing = await findUserByIdRecord(userId)
+  if (!existing) return serviceNotFound("User")
+
+  // Email uniqueness check
+  if (data.email !== undefined && data.email !== (existing as Record<string, unknown>).email) {
+    const conflict = await findUserByEmailRecord(data.email)
+    if (conflict) return serviceConflict("email", "A user with this email already exists.")
+  }
+
+  const now = getCurrentTimestamp()
+  const updateData: {
+    name?: string
+    email?: string
+    passwordHash?: string
+    updatedAt: number
+  } = { updatedAt: now }
+
+  if (data.name !== undefined) updateData.name = data.name
+  if (data.email !== undefined) updateData.email = data.email
+  if (data.password !== undefined) updateData.passwordHash = await hashPassword(data.password)
+
+  const updated = await updateUserRecord(userId, updateData)
+  if (!updated) return serviceNotFound("User")
+
+  if (data.email !== undefined || data.password !== undefined) {
+    await deleteRefreshSessionsForUser(userId)
+  }
+
+  return serviceSuccess(updated, "Profile updated.")
+}

@@ -1,0 +1,26 @@
+---
+import { parseJsonArray } from "./parse-json"
+
+interface Props {
+  tags: string | null
+}
+
+const { tags } = Astro.props
+const parsedTags = [...new Set(parseJsonArray(tags)
+  .filter((tag): tag is string => typeof tag === "string")
+  .map((tag) => tag.trim().slice(0, 100))
+  .filter(Boolean))].slice(0, 100)
+---
+
+{parsedTags.length > 0 && (
+  <nav class="mt-6 flex flex-wrap gap-2" aria-label="Tags">
+    {parsedTags.map((tag) => (
+      <a
+        href={`/tag/${encodeURIComponent(tag)}`}
+        class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+      >
+        #{tag}
+      </a>
+    ))}
+  </nav>
+)}

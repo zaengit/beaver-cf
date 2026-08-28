@@ -1,0 +1,17 @@
+---
+import type { ArchiveProps } from "../types"
+import ArchiveFilters from "./archive-filters.astro"
+import ArchiveHeader from "./archive-header.astro"
+import ArchivePagination from "./archive-pagination.astro"
+import ArchivePosts from "./archive-posts.astro"
+const { contentType, posts, filterOptions, filters, pagination } = Astro.props as ArchiveProps
+---
+
+<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+  <ArchiveHeader {contentType} variant="default" />
+
+  <ArchiveFilters {contentType} {filterOptions} {filters} />
+  <ArchivePosts {contentType} {posts} variant="default" />
+
+  <ArchivePagination {filters} {pagination} />
+</main>

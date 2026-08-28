@@ -1,0 +1,39 @@
+---
+import PublicLayout from "@/layouts/public-layout.astro"
+import PublicPostList from "@/components/public-post-list.astro"
+import { searchPublishedPosts } from "@zbeaver/beaver-cf/server"
+
+const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 100)
+const result = query ? await searchPublishedPosts(query, 1, 10) : null
+const posts = result?.success ? result.data.data : []
+---
+
+<PublicLayout title={query ? `Search: ${query}` : "Search"}>
+  <main class="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+    <h1 class="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">Search</h1>
+    <form action="/search" class="mt-8 flex max-w-2xl gap-3">
+      <label class="sr-only" for="search-page-input">Search published content</label>
+      <input
+        id="search-page-input"
+        name="q"
+        value={query}
+        type="search"
+        placeholder="Search published content..."
+        class="min-w-0 flex-1 border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none focus:border-slate-950 focus:ring-1 focus:ring-slate-950"
+      />
+      <button class="bg-slate-950 px-5 py-3 font-semibold text-white hover:bg-slate-800">Search</button>
+    </form>
+
+    {query ? (
+      <p class="mt-8 text-slate-600">{result?.success ? result.data.meta.total : 0} result{result?.success && result.data.meta.total === 1 ? "" : "s"} for <span class="font-semibold text-slate-950">“{query}”</span></p>
+    ) : (
+      <p class="mt-8 text-slate-600">Enter a term to search published content.</p>
+    )}
+
+    <PublicPostList
+      posts={posts}
+      listClass="mt-8 divide-y divide-slate-200 border-y border-slate-200"
+      showDetails
+    />
+  </main>
+</PublicLayout>
