@@ -14,6 +14,7 @@ import {
   Hash,
   Globe,
   History,
+  Inbox,
 } from "lucide-react"
 import {
   Sidebar,
@@ -63,6 +64,7 @@ const workspaceNavItems = [
 
 const administrationNavItems = [
   { title: "Users", href: "/admin/users", icon: Users, permission: "users.view" },
+  { title: "Contact submissions", href: "/admin/contact-submissions", icon: Inbox, permission: "contact-submissions.view" },
   { title: "Activity Log", href: "/admin/activity-log", icon: History, permission: "activity-log.view" },
   { title: "Settings", href: "/admin/settings", icon: Globe, permission: "settings.manage" },
 ] as const

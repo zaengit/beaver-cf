@@ -36,6 +36,10 @@ function requiredPermissions(pathname: string, method: string) {
     return ["users.edit", "users.manage"]
   }
   if (rest === "/dashboard") return ["dashboard.view"]
+  if (rest.startsWith("/contact-submissions")) {
+    if (rest === "/contact-submissions/bulk/delete" && method === "POST") return ["contact-submissions.delete"]
+    return ["contact-submissions.view"]
+  }
   if (rest.startsWith("/activity-logs")) return ["activity-log.view"]
   // Post and category permissions depend on their content type. Their handlers
   // resolve the type from the request or stored record before authorizing.

@@ -20,6 +20,7 @@ function createApp() {
   const app = new Hono<AdminApiEnvironment>().basePath("/api")
   app.use("/admin/*", adminSecurity)
   app.post("/admin/users/:id/2fa/disable", (context) => context.json({ ok: true }))
+  app.post("/admin/contact-submissions/bulk/delete", (context) => context.json({ ok: true }))
   return app
 }
 
@@ -48,6 +49,28 @@ describe("admin user 2FA permissions", () => {
     canMock.mockImplementation(async (_userId: string, permission: string) => permission === "users.manage")
 
     const response = await createApp().request("http://localhost/api/admin/users/target/2fa/disable", {
+      method: "POST",
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ ok: true })
+  })
+
+  it("requires contact-submissions.delete for bulk deletion", async () => {
+    canMock.mockResolvedValue(false)
+
+    const response = await createApp().request("http://localhost/api/admin/contact-submissions/bulk/delete", {
+      method: "POST",
+    })
+
+    expect(response.status).toBe(403)
+    expect(canMock).toHaveBeenCalledWith("viewer", "contact-submissions.delete")
+  })
+
+  it("allows an admin with contact-submissions.delete through", async () => {
+    canMock.mockImplementation(async (_userId: string, permission: string) => permission === "contact-submissions.delete")
+
+    const response = await createApp().request("http://localhost/api/admin/contact-submissions/bulk/delete", {
       method: "POST",
     })
 

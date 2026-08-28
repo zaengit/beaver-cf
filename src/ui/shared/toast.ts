@@ -16,6 +16,7 @@ export type AdminToastEntity =
   | "menu item"
   | "profile"
   | "selected media"
+  | "contact submissions"
   | "url"
 
 const entityLabels: Record<AdminToastEntity, string> = {
@@ -31,6 +32,7 @@ const entityLabels: Record<AdminToastEntity, string> = {
   "menu item": "Menu item",
   profile: "Profile",
   "selected media": "Selected media",
+  "contact submissions": "Contact submissions",
   url: "URL",
 }
 

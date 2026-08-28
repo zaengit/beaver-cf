@@ -75,6 +75,8 @@ export function getPermissionDefinitions(): PermissionDefinition[] {
     { slug: "users.edit", name: "Edit user profiles", group: "users" },
     { slug: "users.delete", name: "Delete users", group: "users" },
     { slug: "users.manage", name: "Manage users and credentials", group: "users" },
+    { slug: "contact-submissions.view", name: "View contact submissions", group: "contact-submissions" },
+    { slug: "contact-submissions.delete", name: "Delete contact submissions", group: "contact-submissions" },
     { slug: "activity-log.view", name: "View activity log", group: "activity-log" },
     { slug: "settings.manage", name: "Manage system settings", group: "settings" },
   ]

@@ -91,3 +91,22 @@ export interface AdminActivityLogListResponse {
   data: AdminActivityLog[]
   meta: AdminPaginationMeta
 }
+
+export interface AdminContactSubmissionListItem {
+  id: string
+  name: string
+  email: string
+  subject: string | null
+  createdAt: number
+}
+
+export interface AdminContactSubmission extends AdminContactSubmissionListItem {
+  message: string
+  ipAddress: string | null
+  userAgent: string | null
+}
+
+export interface AdminContactSubmissionListResponse {
+  data: AdminContactSubmissionListItem[]
+  meta: AdminPaginationMeta
+}

@@ -100,6 +100,7 @@ export function describeActivityRequest(pathname: string, method: string): Activ
   if (resource === "users") return collectionDescriptor("user", segments, method)
   if (resource === "media") return collectionDescriptor("media", segments, method)
   if (resource === "menus") return collectionDescriptor("menu", segments, method)
+  if (resource === "contact-submissions") return collectionDescriptor("contact-submission", segments, method)
   return null
 }
 

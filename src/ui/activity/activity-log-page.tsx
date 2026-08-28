@@ -38,6 +38,7 @@ const RESOURCE_OPTIONS = [
   ["user", "Users"],
   ["media", "Media"],
   ["menu", "Menus"],
+  ["contact-submission", "Contact submissions"],
   ["settings", "Settings"],
 ] as const
 
@@ -75,7 +76,10 @@ function formatAction(action: string) {
 }
 
 function formatResource(resource: string) {
-  return resource.charAt(0).toUpperCase() + resource.slice(1)
+  return resource
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
 }
 
 function actorLabel(item: AdminActivityLog) {

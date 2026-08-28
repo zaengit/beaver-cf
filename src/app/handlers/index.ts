@@ -67,3 +67,8 @@ export {
   handleUploadMedia,
 } from "./media"
 export { handleListActivityLogs } from "./activity-logs"
+export {
+  handleListContactSubmissions,
+  handleGetContactSubmission,
+  handleBulkDeleteContactSubmissions,
+} from "./contact-submissions"

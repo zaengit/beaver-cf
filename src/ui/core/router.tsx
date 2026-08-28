@@ -100,6 +100,11 @@ const AdminActivityLogPage = lazy(async () => {
   return { default: mod.AdminActivityLogPage }
 })
 
+const AdminContactSubmissionsPage = lazy(async () => {
+  const mod = await import("@zbeaver/beaver/ui/contact-submissions/contact-submissions-page")
+  return { default: mod.AdminContactSubmissionsPage }
+})
+
 const AdminTrashPage = lazy(async () => {
   const mod = await import("@zbeaver/beaver/ui/trash/trash-page")
   return { default: mod.AdminTrashPage }
@@ -141,6 +146,7 @@ export function AdminRouter() {
           <Route path="categories/:type/new" element={<AdminCategoryCreatePage />} />
           <Route path="categories/:type/:id/edit" element={<AdminCategoryEditRoute />} />
           <Route path="settings" element={<AdminSettingsPage />} />
+          <Route path="contact-submissions" element={<RequireAdminPermission permission="contact-submissions.view"><AdminContactSubmissionsPage /></RequireAdminPermission>} />
           <Route path="activity-log" element={<RequireAdminPermission permission="activity-log.view"><AdminActivityLogPage /></RequireAdminPermission>} />
         </Route>
         <Route path="*" element={<Navigate to={ADMIN_PATH} replace />} />
