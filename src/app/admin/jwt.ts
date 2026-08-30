@@ -4,6 +4,10 @@ import { getRuntimeEnvValue } from "@zbeaver/beaver/app/runtime"
 import type { StaticRole } from "@zbeaver/beaver/pkg/types/roles"
 
 const encoder = new TextEncoder()
+const JWT_ISSUER = "beaver-cf"
+const ACCESS_AUDIENCE = "admin-access"
+const REFRESH_AUDIENCE = "admin-refresh"
+const TWO_FACTOR_AUDIENCE = "admin-2fa"
 
 async function getJwtSecret(name: "ADMIN_JWT_ACCESS_SECRET" | "ADMIN_JWT_REFRESH_SECRET") {
   const value = getRuntimeEnvValue(name)
@@ -64,7 +68,9 @@ type TwoFactorChallengeClaims = {
 
 export async function signAccessToken(claims: AccessClaims) {
   return new SignJWT(claims)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(ACCESS_AUDIENCE)
     .setSubject(claims.sub)
     .setIssuedAt()
     .setExpirationTime("15m")
@@ -73,7 +79,9 @@ export async function signAccessToken(claims: AccessClaims) {
 
 export async function signRefreshToken(claims: RefreshClaims) {
   return new SignJWT(claims)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(REFRESH_AUDIENCE)
     .setSubject(claims.sub)
     .setIssuedAt()
     .setExpirationTime("30d")
@@ -82,7 +90,9 @@ export async function signRefreshToken(claims: RefreshClaims) {
 
 export async function signTwoFactorChallengeToken(claims: Omit<TwoFactorChallengeClaims, "purpose">) {
   return new SignJWT({ ...claims, purpose: "admin-2fa" as const })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(TWO_FACTOR_AUDIENCE)
     .setSubject(claims.sub)
     .setIssuedAt()
     .setExpirationTime("5m")
@@ -90,17 +100,29 @@ export async function signTwoFactorChallengeToken(claims: Omit<TwoFactorChalleng
 }
 
 export async function verifyAccessToken(token: string) {
-  const result = await jwtVerify<AccessClaims>(token, await getAccessSecret(), { algorithms: ["HS256"] })
+  const result = await jwtVerify<AccessClaims>(token, await getAccessSecret(), {
+    algorithms: ["HS256"],
+    issuer: JWT_ISSUER,
+    audience: ACCESS_AUDIENCE,
+  })
   return result.payload
 }
 
 export async function verifyRefreshToken(token: string) {
-  const result = await jwtVerify<RefreshClaims>(token, await getRefreshSecret(), { algorithms: ["HS256"] })
+  const result = await jwtVerify<RefreshClaims>(token, await getRefreshSecret(), {
+    algorithms: ["HS256"],
+    issuer: JWT_ISSUER,
+    audience: REFRESH_AUDIENCE,
+  })
   return result.payload
 }
 
 export async function verifyTwoFactorChallengeToken(token: string) {
-  const result = await jwtVerify<TwoFactorChallengeClaims>(token, await getAccessSecret(), { algorithms: ["HS256"] })
+  const result = await jwtVerify<TwoFactorChallengeClaims>(token, await getAccessSecret(), {
+    algorithms: ["HS256"],
+    issuer: JWT_ISSUER,
+    audience: TWO_FACTOR_AUDIENCE,
+  })
   if (result.payload.purpose !== "admin-2fa") throw new Error("Invalid two-factor challenge.")
   return result.payload
 }
