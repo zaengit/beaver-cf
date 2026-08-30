@@ -9,7 +9,6 @@ import {
 } from "@zbeaver/beaver/app/admin/auth-cookies"
 import { signAccessToken, signRefreshToken } from "@zbeaver/beaver/app/admin/jwt"
 import { getRefreshSessionExpiry, saveRefreshSession } from "@zbeaver/beaver/app/admin/session-store"
-import { isSuperAdminUserId } from "@zbeaver/beaver/app/admin/super-admin"
 import { isTwoFactorEnabled } from "@zbeaver/beaver/app/services/two-factor"
 import { generateId } from "@zbeaver/beaver/pkg/utils/id"
 
@@ -36,9 +35,7 @@ export async function establishAdminSession(
     twoFactorVerified,
   })
 
-  if (!isSuperAdminUserId(user.id)) {
-    await saveRefreshSession(sessionId, user.id, getRefreshSessionExpiry())
-  }
+  await saveRefreshSession(sessionId, user.id, getRefreshSessionExpiry())
   cookies.set(ADMIN_ACCESS_COOKIE, accessToken, buildAdminAccessCookieOptions())
   cookies.set(ADMIN_REFRESH_COOKIE, refreshToken, buildAdminRefreshCookieOptions())
 
