@@ -15,7 +15,7 @@ export function buildAdminAccessCookieOptions() {
   return {
     httpOnly: true,
     secure: secureCookies(),
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/",
     maxAge: 60 * 15,
   }
@@ -25,7 +25,7 @@ export function buildAdminRefreshCookieOptions() {
   return {
     httpOnly: true,
     secure: secureCookies(),
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   }
@@ -35,7 +35,7 @@ export function buildAdminTwoFactorChallengeCookieOptions() {
   return {
     httpOnly: true,
     secure: secureCookies(),
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/api/admin/auth",
     maxAge: 5 * 60,
   }
