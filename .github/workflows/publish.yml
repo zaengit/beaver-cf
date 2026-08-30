@@ -1,4 +1,4 @@
-name: Publish Beaver
+name: Publish Beaver to npmjs
 
 on:
   push:
@@ -7,11 +7,16 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npm
 
     steps:
       - name: Check out source
@@ -21,10 +26,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          registry-url: "https://npm.pkg.github.com/"
+          registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
 
-      - name: Verify release versions
+      - name: Verify release version
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: make verify-tag TAG="$RELEASE_TAG"
@@ -38,23 +43,24 @@ jobs:
       - name: Run tests
         run: npm test --if-present
 
-      - name: Publish package
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify publishable package
+        run: npm pack --dry-run
 
-      - name: Wait for package availability
+      - name: Publish to npmjs
+        run: npm publish --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify npmjs availability
         run: |
           BEAVER_VERSION=$(node -p "require('./package.json').version")
           for attempt in $(seq 1 30); do
-            if npm view "@zaengit/beaver-cf@${BEAVER_VERSION}" version --registry=https://npm.pkg.github.com/ >/dev/null 2>&1; then
-              echo "@zaengit/beaver-cf@${BEAVER_VERSION} is available"
+            if npm view "@zaengit/beaver-cf@${BEAVER_VERSION}" version --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
+              echo "@zaengit/beaver-cf@${BEAVER_VERSION} is available on npmjs"
               exit 0
             fi
-            echo "Waiting for @zaengit/beaver-cf@${BEAVER_VERSION} (${attempt}/30)"
+            echo "Waiting for @zaengit/beaver-cf@${BEAVER_VERSION} on npmjs (${attempt}/30)"
             sleep 10
           done
-          echo "@zaengit/beaver-cf@${BEAVER_VERSION} was not available after 5 minutes" >&2
+          echo "@zaengit/beaver-cf@${BEAVER_VERSION} was not available on npmjs after 5 minutes" >&2
           exit 1
