@@ -2,7 +2,9 @@
   "name": "@zaengit/beaver-cf",
   "version": "0.1.0",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
   },
   "description": "Cloudflare Workers-native CMS server, API, and React admin UI.",
   "license": "MIT",
