@@ -47,9 +47,15 @@ async function serveStorageFile(path: string | undefined, method: "GET" | "HEAD"
       "Cache-Control": "public, max-age=31536000, immutable",
       "Content-Length": String(object.size),
       "Content-Type": object.httpMetadata?.contentType ?? contentType(path),
+      "Cross-Origin-Resource-Policy": "same-site",
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
       ETag: object.httpEtag,
     })
     if (object.httpMetadata?.cacheControl) headers.set("Cache-Control", object.httpMetadata.cacheControl)
+    if (headers.get("Content-Type") === "application/pdf") {
+      headers.set("Content-Security-Policy", "default-src 'none'; sandbox")
+    }
     return new Response(method === "HEAD" ? null : streamR2Body(object.body), { headers })
   } catch {
     return new Response("Not Found", { status: 404 })
